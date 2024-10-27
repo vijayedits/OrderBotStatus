@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status Bot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Order Status Bot</h1>
+    <div id="chat">
+        <input type="text" id="orderId" placeholder="Enter Order ID">
+        <button onclick="checkOrderStatus()">Check Status</button>
+        <div id="response"></div>
+    </div>
+    <div id="chatgpt">
+        <h2>Chat with GPT</h2>
+        <input type="text" id="userMessage" placeholder="Type your message">
+        <button onclick="sendMessage()">Send</button>
+        <div id="chatgptResponse"></div>
+    </div>
+    <script>
+        async function checkOrderStatus() {
+            const orderId = document.getElementById('orderId').value;
+            const responseDiv = document.getElementById('response');
+
+            try {
+                const response = await fetch(`/order/${orderId}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    responseDiv.innerText = `Order ID: ${data.orderId}\nStatus: ${data.status}\nDelivery Date: ${data.deliveryDate}\nTracking Number: ${data.trackingNumber}`;
+                } else {
+                    responseDiv.innerText = data.message;
+                }
+            } catch (error) {
+                responseDiv.innerText = 'Error fetching order status. Please try again later.';
+            }
+        }
+
+        async function sendMessage() {
+            const userMessage = document.getElementById('userMessage').value;
+            const responseDiv = document.getElementById('chatgptResponse');
+
+            try {
+                const response = await fetch('/chatgpt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: userMessage }), // Corrected here
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    responseDiv.innerText = `ChatGPT: ${data.reply}`; // Changed from data.response to data.reply
+                } else {
+                    responseDiv.innerText = 'Error fetching response. Please try again.';
+                }
+            } catch (error) {
+                responseDiv.innerText = 'Error sending message to ChatGPT. Please try again later.';
+            }
+        }
+    </script>
+</body>
+</html>
